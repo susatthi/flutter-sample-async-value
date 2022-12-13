@@ -9,6 +9,7 @@ linter:
     constant_identifier_names: true
     library_private_types_in_public_api: false
     one_member_abstracts: false
+    only_throw_errors: false
     prefer_relative_imports: true
     use_build_context_synchronously: false
 
