@@ -12,6 +12,18 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ログイン結果をハンドリングする
+    ref.handleAsyncValue<void>(
+      loginResultProvider,
+      completeMessage: 'ログインしました！',
+      complete: (context, _) async {
+        // ログインできたらホーム画面に遷移する
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      },
+    );
+
     return MaterialApp(
       scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
       title: 'AsyncValue Sample',
@@ -80,18 +92,6 @@ class LoginPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ログイン結果をハンドリングする
-    ref.handleAsyncValue<void>(
-      loginResultProvider,
-      completeMessage: 'ログインしました！',
-      complete: (_) async {
-        // ログインできたらホーム画面に遷移する
-        await Navigator.of(context).push<void>(
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      },
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('AsyncValue Sample'),
@@ -153,7 +153,7 @@ class UserService {
 
       // エラー時の動作が確認できるように1/2の確率で例外を発生させる
       if ((Random().nextInt(2) % 2).isEven) {
-        throw 'ログインできませんでした。';
+        // throw 'ログインできませんでした。';
       }
     });
   }
@@ -163,7 +163,7 @@ extension WidgetRefEx on WidgetRef {
   /// AsyncValueを良い感じにハンドリングする
   void handleAsyncValue<T>(
     ProviderListenable<AsyncValue<T>> asyncValueProvider, {
-    void Function(T data)? complete,
+    void Function(BuildContext context, T data)? complete,
     String? completeMessage,
   }) =>
       listen<AsyncValue<T>>(
@@ -189,7 +189,7 @@ extension WidgetRefEx on WidgetRef {
                   ),
                 );
               }
-              complete?.call(data);
+              complete?.call(read(navigatorKeyProvider).currentContext!, data);
             },
             error: (e, s) async {
               loadingNotifier.hide();
