@@ -105,7 +105,8 @@ class LoginPage extends ConsumerWidget {
               ),
             );
 
-            await Navigator.of(context).push<void>(
+            await Navigator.of(ref.read(navigatorKeyProvider).currentContext!)
+                .push<void>(
               MaterialPageRoute(
                 builder: (context) => const HomePage(),
               ),
