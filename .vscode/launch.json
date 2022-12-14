@@ -16,6 +16,14 @@
             "flutterMode": "debug",
             "program": "lib/main_no_async_value.dart",
             "args": []
+        },
+        {
+            "name": "app-use-async-value",
+            "type": "dart",
+            "request": "launch",
+            "flutterMode": "debug",
+            "program": "lib/main_use_async_value.dart",
+            "args": []
         }
     ]
 }
