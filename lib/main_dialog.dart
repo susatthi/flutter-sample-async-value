@@ -14,6 +14,7 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
+      navigatorKey: ref.watch(navigatorKeyProvider),
       title: 'AsyncValue Sample',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -23,25 +24,17 @@ class App extends ConsumerWidget {
       builder: (context, child) => Consumer(
         builder: (context, ref, _) {
           final isLoading = ref.watch(loadingProvider);
-          return Navigator(
-            key: ref.watch(navigatorKeyProvider),
-            onPopPage: (_, dynamic __) => false,
-            pages: [
-              MaterialPage<Widget>(
-                child: Stack(
-                  children: [
-                    child!,
-                    // ローディングを表示する
-                    if (isLoading)
-                      const ColoredBox(
-                        color: Colors.black26,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                  ],
+          return Stack(
+            children: [
+              child!,
+              // ローディングを表示する
+              if (isLoading)
+                const ColoredBox(
+                  color: Colors.black26,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
-              ),
             ],
           );
         },
@@ -106,8 +99,7 @@ class LoginPage extends ConsumerWidget {
               ),
             );
 
-            await Navigator.of(ref.read(navigatorKeyProvider).currentContext!)
-                .push<void>(
+            await Navigator.of(context).push<void>(
               MaterialPageRoute(
                 builder: (context) => const HomePage(),
               ),
