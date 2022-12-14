@@ -74,9 +74,9 @@ class LoginPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ログイン処理結果をハンドリングする
+    // ログイン処理状態をハンドリングする
     ref.listen<AsyncValue<void>>(
-      loginResultProvider,
+      loginStateProvider,
       (_, next) async {
         final loadingNotifier = ref.read(loadingProvider.notifier);
         if (next.isLoading) {
@@ -158,8 +158,8 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// ログイン処理結果
-final loginResultProvider = StateProvider<AsyncValue<void>>(
+/// ログイン処理状態
+final loginStateProvider = StateProvider<AsyncValue<void>>(
   (_) => const AsyncValue.data(null),
 );
 
@@ -175,7 +175,7 @@ class UserService {
 
   /// ログインする
   Future<void> login() async {
-    final notifier = ref.read(loginResultProvider.notifier);
+    final notifier = ref.read(loginStateProvider.notifier);
 
     // ログイン結果をローディング中にする
     notifier.state = const AsyncValue.loading();

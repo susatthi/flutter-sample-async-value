@@ -14,7 +14,7 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // ログイン結果をハンドリングする
     ref.handleAsyncValue<void>(
-      loginResultProvider,
+      loginStateProvider,
       completeMessage: 'ログインしました！',
       complete: (context, _) async {
         // ログインできたらホーム画面に遷移する
@@ -26,7 +26,7 @@ class App extends ConsumerWidget {
 
     // ログアウト結果をハンドリングする
     ref.handleAsyncValue<void>(
-      logoutResultProvider,
+      logoutStateProvider,
       completeMessage: 'ログアウトしました！',
       complete: (context, _) {
         // ログアウトしたらログイン画面に戻る
@@ -139,13 +139,13 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// ログイン処理結果
-final loginResultProvider = StateProvider<AsyncValue<void>>(
+/// ログイン処理状態
+final loginStateProvider = StateProvider<AsyncValue<void>>(
   (_) => const AsyncValue.data(null),
 );
 
-/// ログアウト処理結果
-final logoutResultProvider = StateProvider<AsyncValue<void>>(
+/// ログアウト処理状態
+final logoutStateProvider = StateProvider<AsyncValue<void>>(
   (_) => const AsyncValue.data(null),
 );
 
@@ -161,7 +161,7 @@ class UserService {
 
   /// ログインする
   Future<void> login() async {
-    final notifier = ref.read(loginResultProvider.notifier);
+    final notifier = ref.read(loginStateProvider.notifier);
 
     // ログイン結果をローディング中にする
     notifier.state = const AsyncValue.loading();
@@ -180,7 +180,7 @@ class UserService {
 
   /// ログアウトする
   Future<void> logout() async {
-    final notifier = ref.read(logoutResultProvider.notifier);
+    final notifier = ref.read(logoutStateProvider.notifier);
 
     // ログイン結果をローディング中にする
     notifier.state = const AsyncValue.loading();
