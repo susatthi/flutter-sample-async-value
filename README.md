@@ -1,4 +1,4 @@
-# 【Flutter】 Riverpod の AsyncValue のサンプル
+# Riverpod の AsyncValue を使ったローディングとダイアログとスナックバーのサンプル
 
 本リポジトリは以下の記事のサンプルコードです。
 
