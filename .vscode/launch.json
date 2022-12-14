@@ -8,46 +8,6 @@
             "flutterMode": "debug",
             "program": "lib/main.dart",
             "args": []
-        },
-        {
-            "name": "app-no-async-value",
-            "type": "dart",
-            "request": "launch",
-            "flutterMode": "debug",
-            "program": "lib/main_no_async_value.dart",
-            "args": []
-        },
-        {
-            "name": "app-use-async-value",
-            "type": "dart",
-            "request": "launch",
-            "flutterMode": "debug",
-            "program": "lib/main_use_async_value.dart",
-            "args": []
-        },
-        {
-            "name": "app-global-loading",
-            "type": "dart",
-            "request": "launch",
-            "flutterMode": "debug",
-            "program": "lib/main_global_loading.dart",
-            "args": []
-        },
-        {
-            "name": "app-snackbar",
-            "type": "dart",
-            "request": "launch",
-            "flutterMode": "debug",
-            "program": "lib/main_snackbar.dart",
-            "args": []
-        },
-        {
-            "name": "app-dialog",
-            "type": "dart",
-            "request": "launch",
-            "flutterMode": "debug",
-            "program": "lib/main_dialog.dart",
-            "args": []
         }
     ]
 }
