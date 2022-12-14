@@ -7,32 +7,6 @@ void main() {
   runApp(const ProviderScope(child: App()));
 }
 
-/// スナックバー表示用のGlobalKey
-final scaffoldMessengerKeyProvider = Provider(
-  (_) => GlobalKey<ScaffoldMessengerState>(),
-);
-
-/// ダイアログ表示用のGlobalKey
-final navigatorKeyProvider = Provider(
-  (_) => GlobalKey<NavigatorState>(),
-);
-
-/// オーバーレイローディングの表示有無
-final overlayLoadingProvider = NotifierProvider<OverlayLoadingNotifier, bool>(
-  OverlayLoadingNotifier.new,
-);
-
-class OverlayLoadingNotifier extends Notifier<bool> {
-  @override
-  bool build() => false;
-
-  /// ローディングを表示する
-  void show() => state = true;
-
-  /// ローディングを非表示にする
-  void hide() => state = false;
-}
-
 class App extends ConsumerWidget {
   const App({super.key});
 
@@ -48,7 +22,7 @@ class App extends ConsumerWidget {
       home: const LoginPage(),
       builder: (context, child) => Consumer(
         builder: (context, ref, _) {
-          final isLoading = ref.watch(overlayLoadingProvider);
+          final isLoading = ref.watch(loadingProvider);
           return Navigator(
             key: ref.watch(navigatorKeyProvider),
             onPopPage: (route, dynamic _) => false,
@@ -76,18 +50,47 @@ class App extends ConsumerWidget {
   }
 }
 
+/// スナックバー表示用のGlobalKey
+final scaffoldMessengerKeyProvider = Provider(
+  (_) => GlobalKey<ScaffoldMessengerState>(),
+);
+
+/// ダイアログ表示用のGlobalKey
+final navigatorKeyProvider = Provider(
+  (_) => GlobalKey<NavigatorState>(),
+);
+
+/// ローディングの表示有無
+final loadingProvider = NotifierProvider<LoadingNotifier, bool>(
+  LoadingNotifier.new,
+);
+
+class LoadingNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  /// ローディングを表示する
+  void show() => state = true;
+
+  /// ローディングを非表示にする
+  void hide() => state = false;
+}
+
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ログイン処理結果をハンドリングする
-    ref.listenAsync<void>(
-      processResultProvider,
-      complete: (_) => Navigator.of(context).push<void>(
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      ),
+    // ログイン結果をハンドリングする
+    ref.handleAsyncValue<void>(
+      loginResultProvider,
       completeMessage: 'ログインしました！',
+      complete: (_) async {
+        // ログインできたらホーム画面に遷移する
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      },
     );
 
     return Scaffold(
@@ -122,8 +125,8 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// メソッド処理結果
-final processResultProvider = StateProvider<AsyncValue<void>>(
+/// ログイン結果
+final loginResultProvider = StateProvider<AsyncValue<void>>(
   (_) => const AsyncValue.data(null),
 );
 
@@ -139,10 +142,14 @@ class UserService {
 
   /// ログインする
   Future<void> login() async {
-    final notifier = ref.read(processResultProvider.notifier);
+    final notifier = ref.read(loginResultProvider.notifier);
+
+    // ログイン結果をローディング中にする
     notifier.state = const AsyncValue.loading();
+
+    // ログイン処理を実行する
     notifier.state = await AsyncValue.guard(() async {
-      // ローディングを出したいので擬似的に2秒待つ
+      // ローディングを出したいので2秒待つ
       await Future<void>.delayed(const Duration(seconds: 2));
 
       // エラー時の動作が確認できるように1/2の確率で例外を発生させる
@@ -155,7 +162,7 @@ class UserService {
 
 extension WidgetRefEx on WidgetRef {
   /// AsyncValueを良い感じにハンドリングする
-  void listenAsync<T>(
+  void handleAsyncValue<T>(
     ProviderListenable<AsyncValue<T>> asyncValueProvider, {
     void Function(T data)? complete,
     String? completeMessage,
@@ -163,7 +170,7 @@ extension WidgetRefEx on WidgetRef {
       listen<AsyncValue<T>>(
         asyncValueProvider,
         (_, next) async {
-          final loadingNotifier = read(overlayLoadingProvider.notifier);
+          final loadingNotifier = read(loadingProvider.notifier);
           if (next.isLoading) {
             loadingNotifier.show();
             return;
