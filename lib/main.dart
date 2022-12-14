@@ -24,6 +24,16 @@ class App extends ConsumerWidget {
       },
     );
 
+    // ログアウト結果をハンドリングする
+    ref.handleAsyncValue<void>(
+      logoutResultProvider,
+      completeMessage: 'ログアウトしました！',
+      complete: (context, _) {
+        // ログアウトしたらログイン画面に戻る
+        Navigator.of(context).pop();
+      },
+    );
+
     return MaterialApp(
       scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
       title: 'AsyncValue Sample',
@@ -37,6 +47,7 @@ class App extends ConsumerWidget {
           final isLoading = ref.watch(loadingProvider);
           return Navigator(
             key: ref.watch(navigatorKeyProvider),
+            onPopPage: (_, dynamic __) => false,
             pages: [
               MaterialPage<Widget>(
                 child: Stack(
@@ -120,12 +131,28 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('ホーム'),
       ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () => ref.read(userServiceProvider).logout(),
+              child: const Text('ログアウト'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 /// ログイン処理結果
 final loginResultProvider = StateProvider<AsyncValue<void>>(
+  (_) => const AsyncValue.data(null),
+);
+
+/// ログアウト処理結果
+final logoutResultProvider = StateProvider<AsyncValue<void>>(
   (_) => const AsyncValue.data(null),
 );
 
@@ -153,7 +180,26 @@ class UserService {
 
       // エラー時の動作が確認できるように1/2の確率で例外を発生させる
       if ((Random().nextInt(2) % 2).isEven) {
-        // throw 'ログインできませんでした。';
+        throw 'ログインできませんでした。';
+      }
+    });
+  }
+
+  /// ログアウトする
+  Future<void> logout() async {
+    final notifier = ref.read(logoutResultProvider.notifier);
+
+    // ログイン結果をローディング中にする
+    notifier.state = const AsyncValue.loading();
+
+    // ログイン処理を実行する
+    notifier.state = await AsyncValue.guard(() async {
+      // ローディングを出したいので2秒待つ
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      // エラー時の動作が確認できるように1/2の確率で例外を発生させる
+      if ((Random().nextInt(2) % 2).isEven) {
+        throw 'ログアウトできませんでした。';
       }
     });
   }

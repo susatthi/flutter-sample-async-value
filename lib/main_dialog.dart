@@ -25,6 +25,7 @@ class App extends ConsumerWidget {
           final isLoading = ref.watch(loadingProvider);
           return Navigator(
             key: ref.watch(navigatorKeyProvider),
+            onPopPage: (_, dynamic __) => false,
             pages: [
               MaterialPage<Widget>(
                 child: Stack(
