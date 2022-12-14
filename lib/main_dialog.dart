@@ -80,14 +80,51 @@ class LoginPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ログイン結果をハンドリングする
-    ref.handleAsyncValue<void>(
+    // ログイン処理結果をハンドリングする
+    ref.listen<AsyncValue<void>>(
       loginResultProvider,
-      completeMessage: 'ログインしました！',
-      complete: (_) async {
-        // ログインできたらホーム画面に遷移する
-        await Navigator.of(context).push<void>(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+      (_, next) async {
+        final loadingNotifier = ref.read(loadingProvider.notifier);
+        if (next.isLoading) {
+          // ローディングを表示する
+          loadingNotifier.show();
+          return;
+        }
+
+        await next.when(
+          data: (_) async {
+            // ローディングを非表示にする
+            loadingNotifier.hide();
+
+            // ログインできたらスナックバーでメッセージを表示してホーム画面に遷移する
+            final messengerState =
+                ref.read(scaffoldMessengerKeyProvider).currentState;
+            messengerState?.showSnackBar(
+              const SnackBar(
+                content: Text('ログインしました！'),
+              ),
+            );
+
+            await Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+          },
+          error: (e, s) async {
+            // ローディングを非表示にする
+            loadingNotifier.hide();
+
+            // エラーが発生したらエラーダイアログを表示する
+            await showDialog<void>(
+              context: ref.read(navigatorKeyProvider).currentContext!,
+              builder: (context) => ErrorDialog(error: e),
+            );
+          },
+          loading: () {
+            // ローディングを表示する
+            loadingNotifier.show();
+          },
         );
       },
     );
@@ -101,7 +138,10 @@ class LoginPage extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => ref.read(userServiceProvider).login(),
+              onPressed: () async {
+                // ログインを実行する
+                await ref.read(userServiceProvider).login();
+              },
               child: const Text('ログイン'),
             ),
           ],
@@ -157,53 +197,6 @@ class UserService {
       }
     });
   }
-}
-
-extension WidgetRefEx on WidgetRef {
-  /// AsyncValueを良い感じにハンドリングする
-  void handleAsyncValue<T>(
-    ProviderListenable<AsyncValue<T>> asyncValueProvider, {
-    void Function(T data)? complete,
-    String? completeMessage,
-  }) =>
-      listen<AsyncValue<T>>(
-        asyncValueProvider,
-        (_, next) async {
-          final loadingNotifier = read(loadingProvider.notifier);
-          if (next.isLoading) {
-            loadingNotifier.show();
-            return;
-          }
-
-          next.when(
-            data: (data) async {
-              loadingNotifier.hide();
-
-              // 完了メッセージがあればスナックバーを表示する
-              if (completeMessage != null) {
-                final messengerState =
-                    read(scaffoldMessengerKeyProvider).currentState;
-                messengerState?.showSnackBar(
-                  SnackBar(
-                    content: Text(completeMessage),
-                  ),
-                );
-              }
-              complete?.call(data);
-            },
-            error: (e, s) async {
-              loadingNotifier.hide();
-
-              // エラーが発生したらエラーダイアログを表示する
-              await showDialog<void>(
-                context: read(navigatorKeyProvider).currentContext!,
-                builder: (context) => ErrorDialog(error: e),
-              );
-            },
-            loading: loadingNotifier.show,
-          );
-        },
-      );
 }
 
 /// エラーダイアログ

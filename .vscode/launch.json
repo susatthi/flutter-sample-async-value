@@ -40,6 +40,14 @@
             "flutterMode": "debug",
             "program": "lib/main_snackbar.dart",
             "args": []
+        },
+        {
+            "name": "app-dialog",
+            "type": "dart",
+            "request": "launch",
+            "flutterMode": "debug",
+            "program": "lib/main_dialog.dart",
+            "args": []
         }
     ]
 }
