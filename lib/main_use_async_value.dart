@@ -35,6 +35,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ログイン処理結果をハンドリングする
     ref.listen<AsyncValue<void>>(
       loginResultProvider,
       (_, next) async {
