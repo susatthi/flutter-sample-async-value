@@ -125,7 +125,7 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// ログイン結果
+/// ログイン処理結果
 final loginResultProvider = StateProvider<AsyncValue<void>>(
   (_) => const AsyncValue.data(null),
 );
