@@ -3,6 +3,7 @@ include: package:pedantic_mono/analysis_options.yaml
 
 linter:
   rules:
+    avoid_catches_without_on_clauses: false
     avoid_classes_with_only_static_members: false
     cascade_invocations: false
     comment_references: false

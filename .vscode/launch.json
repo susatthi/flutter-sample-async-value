@@ -8,6 +8,14 @@
             "flutterMode": "debug",
             "program": "lib/main.dart",
             "args": []
-          }
+        },
+        {
+            "name": "app-no-async-value",
+            "type": "dart",
+            "request": "launch",
+            "flutterMode": "debug",
+            "program": "lib/main_no_async_value.dart",
+            "args": []
+        }
     ]
 }
